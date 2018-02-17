@@ -1,5 +1,6 @@
 #![feature(allocator_api, nonnull)]
-
+use std::heap::{Alloc, Heap, Layout};
+use std::{mem, ptr};
 const kBlockSize: usize = 4096;
 
 struct Arena {
@@ -7,8 +8,6 @@ struct Arena {
     alloc_bytes_remaining_: usize,
 }
 
-use std::heap::{Alloc, Heap, Layout};
-use std::{mem, ptr};
 fn allocator() {
     unsafe {
         let ptr = Heap.alloc(Layout::from_size_align(512 * 1024, 4 * 1024).unwrap())
