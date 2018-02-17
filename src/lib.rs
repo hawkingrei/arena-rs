@@ -1,14 +1,22 @@
+#![feature(allocator_api, nonnull)]
+
+const kBlockSize: usize = 4096;
+
 struct Arena {
-    blocks_: Vec<u8>,
+    blocks_: *mut u8,
     alloc_bytes_remaining_: usize,
 }
 
-const kBlockSize: int = 4096;
-
-impl Arena {
-    fn new(size: usize) -> Arena {
-        Arena {
-            blocks_: Vec::with_capacity(kBlockSize),
+use std::heap::{Alloc, Heap, Layout};
+use std::{mem, ptr};
+fn allocator() {
+    unsafe {
+        let ptr = Heap.alloc(Layout::from_size_align(512 * 1024, 4 * 1024).unwrap())
+            .unwrap_or_else(|e| Heap.oom(e));
+        let mut raw: *mut i32 = mem::transmute::<*mut u8, *mut i32>(ptr);
+        for i in 0..(512 * 1024 / 4) {
+            ptr::write(raw, i as i32);
+            raw = raw.offset(1)
         }
     }
 }
@@ -17,6 +25,6 @@ impl Arena {
 mod tests {
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        super::allocator()
     }
 }
